@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'shreyakharade/flask-docker-app'
+        DOCKER_EXE = 'C:\\Users\\Asus\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe'
+        REGISTRY_CREDENTIALS = 'dockerhub-credentials'
     }
 
     stages {
@@ -24,28 +26,35 @@ pipeline {
 
         stage('Check Docker') {
             steps {
-                bat 'where docker'
-                bat 'docker --version'
+                bat '"%DOCKER_EXE%" --version'
+                bat '"%DOCKER_EXE%" info'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
-                }
+                bat '"%DOCKER_EXE%" build -t "%DOCKER_IMAGE%:%BUILD_NUMBER%" .'
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                echo 'Docker image will be pushed to Docker Hub.'
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+                    bat '"%DOCKER_EXE%" login -u "%DOCKER_USERNAME%" -p "%DOCKER_PASSWORD%"'
+                    bat '"%DOCKER_EXE%" push "%DOCKER_IMAGE%:%BUILD_NUMBER%"'
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploy stage completed.'
+                echo 'Deploy stage completed successfully.'
             }
         }
     }
