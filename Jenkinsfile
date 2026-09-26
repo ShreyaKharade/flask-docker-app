@@ -22,6 +22,13 @@ pipeline {
             }
         }
 
+        stage('Check Docker') {
+            steps {
+                bat 'where docker'
+                bat 'docker --version'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
