@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'SHREYA/flask-docker-app'
+        DOCKER_IMAGE = 'shreyakharade/flask-docker-app'
     }
 
     stages {
